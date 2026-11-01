@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#075e54"><title>Phantom Chat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--green:#075e54;--bright:#128c7e;--bg:#e9edef;--panel:#fff;--text:#111b21;--muted:#667781;--line:#e8edf0;--bubble:#d9fdd3;--incoming:#fff;--shadow:0 8px 28px #0001}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px Inter,system-ui,sans-serif;height:100dvh}
+button,input,textarea{font:inherit}button{cursor:pointer;border:0} .app{height:100dvh;max-width:1280px;margin:auto;background:var(--panel);display:grid;grid-template-columns:340px 1fr;box-shadow:var(--shadow)}
+.sidebar{border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0}.top{background:var(--green);color:white;padding:15px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-weight:700;font-size:18px;letter-spacing:.2px}.profileline{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}.avatar{width:42px;height:42px;border-radius:50%;background:#cde7e2;color:#075e54;display:grid;place-items:center;font-weight:700;flex:none}.me{min-width:0;flex:1}.me strong{display:block}.muted{color:var(--muted);font-size:12px}.search{padding:10px 12px;background:#f6f8f9;border-bottom:1px solid var(--line)}.search input{width:100%;border:0;border-radius:9px;padding:11px;background:white;outline:0}.list{overflow:auto;flex:1}.contact{padding:13px 15px;display:flex;gap:11px;align-items:center;border-bottom:1px solid #f1f3f4;cursor:pointer}.contact:hover,.contact.active{background:#f0f2f5}.contact .details{min-width:0;flex:1}.contact strong{display:block}.contact small{display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}.contact .tag{font-size:11px;color:var(--bright);margin-top:4px}.side-actions{display:flex;gap:8px}.btn{padding:9px 12px;border-radius:9px;background:var(--bright);color:#fff;font-weight:600}.btn.secondary{background:#e8f5f2;color:var(--green)}.btn.ghost{background:transparent;color:inherit;padding:8px}.chat{display:flex;flex-direction:column;min-width:0;background:#efeae2}.chathead{display:flex;align-items:center;gap:11px;padding:12px 18px;background:#f7f9fa;border-bottom:1px solid var(--line)}.chathead .title{flex:1;min-width:0}.chathead strong{display:block}.chatbody{flex:1;overflow:auto;padding:22px clamp(12px,5vw,70px);display:flex;flex-direction:column;gap:8px;background-color:#efeae2;background-image:radial-gradient(#ffffff55 1px,transparent 1px);background-size:18px 18px}.bubble{max-width:min(78%,520px);padding:9px 11px 7px;border-radius:10px;background:var(--incoming);box-shadow:0 1px 1px #0001;align-self:flex-start;overflow-wrap:anywhere;white-space:pre-wrap}.bubble.mine{background:var(--bubble);align-self:flex-end}.stamp{display:block;text-align:right;font-size:10px;color:#667781;margin-top:5px}.system{align-self:center;background:#fff8d6;color:#6b5d2c;border-radius:8px;padding:7px 11px;font-size:12px;text-align:center}.composer{padding:12px 14px;background:#f7f9fa;display:flex;gap:9px;align-items:end}.composer textarea{resize:none;max-height:130px;min-height:42px;flex:1;border:0;outline:0;border-radius:22px;padding:12px 15px;background:white}.send{width:43px;height:43px;border-radius:50%;background:var(--green);color:white;font-size:18px}.empty{margin:auto;text-align:center;color:#52616b;padding:30px}.empty h2{font-size:22px;color:#41515b}.mobileback{display:none}.modalbg{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:18px;z-index:5}.modal{width:min(460px,100%);background:white;border-radius:16px;padding:22px;box-shadow:0 20px 80px #0004}.modal h2{margin:0 0 16px}.modal input{width:100%;padding:12px;border:1px solid #dce2e5;border-radius:9px;margin:7px 0 12px;outline-color:var(--bright)}.modal .row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}.help{font-size:12px;color:var(--muted);line-height:1.5}.status{padding:8px 14px;color:var(--muted);font-size:12px}
+@media(max-width:720px){.app{grid-template-columns:1fr}.sidebar{display:flex}.chat{display:none}.app.chat-open .sidebar{display:none}.app.chat-open .chat{display:flex}.mobileback{display:inline-block}.chatbody{padding:16px 10px}.bubble{max-width:88%}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<aside class="sidebar">
+ <header class="top"><span class="brand">Phantom Chat</span><div class="side-actions"><button class="btn ghost" id="newChat" title="Start chat">＋</button><button class="btn ghost" id="settings" title="Settings">⚙</button></div></header>
+ <section class="profileline"><div class="avatar">ME</div><div class="me"><strong id="myName">Connecting…</strong><span class="muted">Your chat number: <b id="myNumber">—</b></span></div><button class="btn secondary" id="copyNum">Copy</button></section>
+ <div class="search"><input id="search" placeholder="Search chats or enter a number" autocomplete="off"></div>
+ <div class="status" id="status">Connecting to Firebase…</div>
+ <div class="list" id="contacts"></div>
+</aside>
+<main class="chat">
+ <header class="chathead"><button class="btn ghost mobileback" id="back">‹</button><div class="avatar" id="chatAvatar">?</div><div class="title"><strong id="chatName">Choose a chat</strong><span class="muted" id="chatSub">Start by entering someone’s chat number</span></div><button class="btn secondary" id="callBtn" title="PeerJS data connection">Connect</button></header>
+ <section class="chatbody" id="messages"><div class="empty"><h2>Welcome to Phantom Chat</h2><p>Chat with people using their generated number, or open Meta AI.</p></div></section>
+ <form class="composer" id="composer"><textarea id="messageInput" placeholder="Message" rows="1" disabled></textarea><button class="send" id="sendBtn" disabled aria-label="Send">➤</button></form>
+</main>
+</div>
+<div class="modalbg" id="modalbg"><div class="modal" id="modal"></div></div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,signInAnonymously,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,updateDoc,collection,query,where,onSnapshot,addDoc,serverTimestamp,orderBy,limit} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import Peer from "https://esm.sh/peerjs@1.5.4";
+
+const firebaseConfig = {
+  apiKey: "YOUR_FIREBASE_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  appId: "YOUR_FIREBASE_APP_ID"
+};
+const META_AI_ENDPOINT = "/api/meta-ai"; // Server-side proxy; never put a secret API key here.
+const $=id=>document.getElementById(id);
+const appRoot=$("app");
+let auth,db,me,peer,activeChat=null,activeChatId=null,stopMessages=null,stopChats=null,peerConn=null;
+const cache=new Map();
+function showModal(html){$("modal").innerHTML=html;$("modalbg").style.display="flex"}
+function closeModal(){$("modalbg").style.display="none"}
+$("modalbg").addEventListener("click",e=>{if(e.target===$("modalbg"))closeModal()});
+function setStatus(s){$("status").textContent=s}
+function makeNumber(uid){ // Stable user number derived from the Firebase UID.
+ let h=0;for(const c of uid)h=(h*31+c.charCodeAt(0))>>>0;return String(10000000+(h%90000000));
+}
+function chatKey(a,b){return [a,b].sort().join("_")}
+function safeText(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(ts){try{return ts?.toDate?ts.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}catch{return ""}}
+async function boot(){
+ if(firebaseConfig.apiKey.startsWith("YOUR_")){setStatus("Setup needed: add your Firebase web config in index.html.");showModal(`<h2>Connect Firebase</h2><p>Paste your Firebase web app config into <code>index.html</code>, enable Anonymous Authentication, and create a Firestore database.</p><p class="help">See SETUP.md included with this project.</p><div class="row"><button class="btn" id="ok">OK</button></div>`);$("ok").onclick=closeModal;return}
+ const fb=initializeApp(firebaseConfig);auth=getAuth(fb);db=getFirestore(fb);
+ await signInAnonymously(auth);
+ onAuthStateChanged(auth,async user=>{if(!user)return;const ref=doc(db,"users",user.uid);let snap=await getDoc(ref);
+ if(!snap.exists()){const num=makeNumber(user.uid);me={uid:user.uid,number:num,name:"User "+num.slice(-4),peerId:""};await setDoc(ref,{...me,createdAt:serverTimestamp(),lastSeen:serverTimestamp()})}else me=snap.data();
+ $("myName").textContent=me.name;$("myNumber").textContent=me.number;startPeer();listenChats();setStatus("Connected · your number is ready");});
+}
+function startPeer(){
+ try{peer=new Peer(undefined,{debug:0});peer.on("open",async id=>{me.peerId=id;await updateDoc(doc(db,"users",me.uid),{peerId:id,lastSeen:serverTimestamp()});});peer.on("connection",conn=>{conn.on("open",()=>{peerConn=conn;});conn.on("data",data=>{if(data?.kind==="ping")return;});});peer.on("error",e=>console.warn("PeerJS",e));}catch(e){console.warn(e)}
+}
+function listenChats(){
+ if(stopChats)stopChats();
+ const q=query(collection(db,"chats"),where("members","array-contains",me.uid));
+ stopChats=onSnapshot(q,snap=>{const arr=[];snap.forEach(d=>{const x=d.data();arr.push({id:d.id,...x})});arr.sort((a,b)=>(b.updatedAt?.toMillis?.()||0)-(a.updatedAt?.toMillis?.()||0));cache.clear();arr.forEach(x=>cache.set(x.id,x));renderContacts();});
+}
+function renderContacts(){
+ const term=$("search").value.trim().toLowerCase();const list=$("contacts");list.innerHTML="";
+ const ai={id:"meta-ai",name:"Meta AI",number:"AI",ai:true,last:"Ask Meta AI anything"};
+ const items=[ai,...[...cache.values()].map(c=>{const other=c.members.find(x=>x!==me.uid);return {...c,other}})];
+ items.filter(x=>!term||x.name?.toLowerCase().includes(term)||x.number?.includes(term)||x.last?.toLowerCase().includes(term)).forEach(x=>{
+ const el=document.createElement("div");el.className="contact"+(activeChatId===x.id?" active":"");
+ el.innerHTML=`<div class="avatar">${x.ai?"AI":safeText((x.name||"U").slice(0,2).toUpperCase())}</div><div class="details"><strong>${safeText(x.name||"Chat")}</strong><small>${safeText(x.last||"Tap to open")}</small>${x.number&&!x.ai?`<div class="tag">#${safeText(x.number)}</div>`:""}</div>`;
+ el.onclick=()=>openChat(x);list.appendChild(el)
+ });
+ if(!list.children.length)list.innerHTML='<div class="empty">No chats yet. Tap ＋ to connect by number.</div>';
+}
+async function openChat(x){
+ activeChat=x;activeChatId=x.id;appRoot.classList.add("chat-open");$("chatName").textContent=x.name;$("chatSub").textContent=x.ai?"Meta AI assistant":`Chat number ${x.number||""}`;$("chatAvatar").textContent=x.ai?"AI":(x.name||"U").slice(0,2).toUpperCase();
+ $("messageInput").disabled=false;$("sendBtn").disabled=false;$("messages").innerHTML="";
+ if(stopMessages){stopMessages();stopMessages=null}
+ if(x.ai){stopMessages=null;const saved=JSON.parse(localStorage.getItem("phantom_meta_history")||"[]");saved.forEach(renderMessage);if(!saved.length)systemMsg("Your private Meta AI conversation starts here.");return}
+ const q=query(collection(db,"chats",x.id,"messages"),orderBy("createdAt","asc"),limit(500));
+ stopMessages=onSnapshot(q,snap=>{$("messages").innerHTML="";snap.forEach(d=>renderMessage(d.data()));scrollBottom()});
+}
+function renderMessage(m){
+ const div=document.createElement("div");div.className="bubble"+(m.senderId===me?.uid||m.role==="user"?" mine":"");
+ const body=document.createElement("div");body.textContent=m.text||"";div.appendChild(body);
+ const stamp=document.createElement("span");stamp.className="stamp";stamp.textContent=fmt(m.createdAt);div.appendChild(stamp);$("messages").appendChild(div);
+}
+function systemMsg(s){const e=document.createElement("div");e.className="system";e.textContent=s;$("messages").appendChild(e)}
+function scrollBottom(){$("messages").scrollTop=$("messages").scrollHeight}
+async function startNumberChat(){
+ showModal(`<h2>Start a chat</h2><label>Enter their 8-digit Phantom number</label><input id="numberInput" inputmode="numeric" maxlength="8" placeholder="e.g. 12345678"><label>Your display name for this chat</label><input id="nameInput" maxlength="32" placeholder="Friend"><p class="help">Only connect with people who share their number with you.</p><div class="row"><button class="btn secondary" id="cancel">Cancel</button><button class="btn" id="find">Find user</button></div>`);
+ $("cancel").onclick=closeModal;$("find").onclick=async()=>{const n=$("numberInput").value.trim();if(!/^\d{8}$/.test(n)){alert("Enter an 8-digit number.");return}const q=query(collection(db,"users"),where("number","==",n),limit(1));const s=await new Promise((resolve,reject)=>{const off=onSnapshot(q,v=>{off();resolve(v)},reject)});if(s.empty){alert("No user found with that number.");return}const user=s.docs[0].data();if(user.uid===me.uid){alert("That is your own number.");return}const id=chatKey(me.uid,user.uid);const ref=doc(db,"chats",id);const existing=await getDoc(ref);const chat={members:[me.uid,user.uid],names:{[me.uid]:me.name,[user.uid]:$("nameInput").value.trim()||user.name},numbers:{[me.uid]:me.number,[user.uid]:user.number},last:"Say hello",updatedAt:serverTimestamp()};if(!existing.exists())await setDoc(ref,chat);else await updateDoc(ref,{updatedAt:serverTimestamp()});closeModal();openChat({id,name:user.name,number:user.number,peerId:user.peerId,last:"Say hello"})};
+}
+async function sendMessage(text){
+ if(!activeChat||!text.trim())return;const clean=text.trim();
+ if(activeChat.ai){const history=JSON.parse(localStorage.getItem("phantom_meta_history")||"[]");const userMsg={role:"user",text:clean,createdAt:new Date()};history.push(userMsg);renderMessage(userMsg);localStorage.setItem("phantom_meta_history",JSON.stringify(history));$("messageInput").value="";scrollBottom();
+ const pending=document.createElement("div");pending.className="system";pending.textContent="Meta AI is thinking…";$("messages").appendChild(pending);
+ try{const r=await fetch(META_AI_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:history.slice(-20).map(m=>({role:m.role,content:m.text}))})});const data=await r.json();pending.remove();if(!r.ok)throw new Error(data.error||"AI request failed");const answer=data.reply||"I couldn't generate a reply.";const aiMsg={role:"assistant",text:answer,createdAt:new Date()};history.push(aiMsg);localStorage.setItem("phantom_meta_history",JSON.stringify(history));renderMessage(aiMsg);scrollBottom()}catch(e){pending.remove();systemMsg("Meta AI unavailable: "+e.message+" · Check server setup.");}
+ return}
+ const chatId=activeChat.id;const msg={senderId:me.uid,text:clean,createdAt:serverTimestamp()};
+ await addDoc(collection(db,"chats",chatId,"messages"),msg);await updateDoc(doc(db,"chats",chatId),{last:clean.slice(0,100),updatedAt:serverTimestamp()});
+ if(peerConn?.open)try{peerConn.send({kind:"message",chatId,text:clean,senderId:me.uid})}catch{}
+ $("messageInput").value="";scrollBottom();
+}
+$("composer").addEventListener("submit",e=>{e.preventDefault();sendMessage($("messageInput").value)});
+$("messageInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("composer").requestSubmit()}});
+$("newChat").onclick=startNumberChat;$("search").addEventListener("input",renderContacts);
+$("back").onclick=()=>appRoot.classList.remove("chat-open");
+$("copyNum").onclick=async()=>{try{await navigator.clipboard.writeText(me.number);$("copyNum").textContent="Copied";setTimeout(()=>$("copyNum").textContent="Copy",1300)}catch{alert("Your number is "+me.number)}};
+$("settings").onclick=()=>showModal(`<h2>Profile & settings</h2><label>Display name</label><input id="rename" maxlength="32" value="${safeText(me?.name||"")}"><p class="help">Your generated number stays the same. Chat messages are stored in Firestore. Meta AI chat history is saved locally in this browser in this starter version.</p><div class="row"><button class="btn secondary" id="close">Close</button><button class="btn" id="saveName">Save</button></div>`);
+document.addEventListener("click",async e=>{if(e.target.id==="close")closeModal();if(e.target.id==="saveName"){const n=$("rename").value.trim();if(!n)return;me.name=n;await updateDoc(doc(db,"users",me.uid),{name:n});$("myName").textContent=n;closeModal()}});
+$("callBtn").onclick=()=>{if(!activeChat||activeChat.ai){systemMsg("Peer connection is available for user-to-user chats.");return}if(!peer||!activeChat.peerId){systemMsg("PeerJS ID is not available yet. Firestore chat remains live.");return}try{peerConn=peer.connect(activeChat.peerId,{reliable:true});peerConn.on("open",()=>systemMsg("PeerJS data connection established."));peerConn.on("error",()=>systemMsg("PeerJS connection failed. Firestore chat remains available."))}catch{systemMsg("PeerJS connection failed.")}};
+boot().catch(e=>{console.error(e);setStatus("Firebase setup error: "+e.message)});
+</script>
+</body></html>
